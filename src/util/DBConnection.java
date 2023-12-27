@@ -18,11 +18,11 @@ public class DBConnection {
                 System.out.println("Driver is loaded successfully!!");
 
                 // Get the connection string from the property file
-                String connectionString = PropertyUtil.getPropertyString();
+                String connectionString = DBPropertyUtil.getPropertyString();
 
                 // Establish the connection("Most Important")
                 connection = DriverManager.getConnection(connectionString); //Passes the connString from propertiesUtil File to driverManager.
-                System.out.println("Database ("+PropertyUtil.dbName+") is connected Successfully!!\n");
+                System.out.println("Database ("+DBPropertyUtil.dbName+") is connected Successfully!!\n");
 
 
             } catch (ClassNotFoundException | SQLException e) {

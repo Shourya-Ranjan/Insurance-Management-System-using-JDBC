@@ -54,7 +54,7 @@ public class Menu {
         System.out.println("4. Update an existing Policy!");
         System.out.println("5. Delete an existing Policy!");
         System.out.println("6. To Exit!");
-        
+        System.out.println("=======================================");
     }
 
     private static void createyourPolicy() {
@@ -125,7 +125,6 @@ public class Menu {
         }
     }
     }
-
 
     private static void deleteyourPolicy() {
         System.out.println("Deleting a policy...");

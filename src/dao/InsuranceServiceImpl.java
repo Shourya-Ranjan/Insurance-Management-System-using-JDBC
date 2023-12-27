@@ -2,8 +2,9 @@ package dao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import entity.*;
 import exception.PolicyNotFoundException;
@@ -13,15 +14,12 @@ import java.sql.Connection;
 
 public class InsuranceServiceImpl implements IPolicyService {
     static Scanner scanner = new Scanner(System.in);
-    Connection conn = DBConnection.getConnection();
+    static Connection conn = DBConnection.getConnection();
 
     @Override
-    public boolean createPolicy(Policy policy) { //Create PolicyFunction
-        Connection conn = DBConnection.getConnection();
-
+    public boolean createPolicy(Policy policy) { // Create PolicyFunction
         boolean status = false;
         try {
-
             String query = "INSERT INTO policy (policyId, policyName, policyType, coverageAmount)\r\n"
                     + "VALUES (?, ?, ?, ?);";
             // INSERT INTO Policy (policyId, policyName, policyType, coverageAmount)
@@ -60,84 +58,77 @@ public class InsuranceServiceImpl implements IPolicyService {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        return result; // Policy not found
+        return result; 
     }
 
     @Override
     public Collection<Policy> getAllPolicies() {
-        Connection conn = DBConnection.getConnection();
-		ArrayList<Policy> result=new ArrayList<Policy>();
-		try {
-			
-			String query = "Select * from policy ";
-//			INSERT INTO Policy (policyId, policyName, policyType, coverageAmount)
-//			VALUES (1, 'Life Insurance', 'Term Life', 50000.00);
-			PreparedStatement pstmt=conn.prepareStatement(query);
-			ResultSet res = pstmt.executeQuery();
-			
-			while(res.next())
-			result.add(new Policy(res.getInt("policyId"),res.getString("policyName"),res.getString("policyType"),res.getDouble("coverageAmount")));
-			return result;
-		}
-		catch(Exception e) {
-			System.out.println(e.getMessage());
-		}
-		return result;
-        
+        Map<Integer, Policy> policyMap = new HashMap<>();
+        try {
+            String query = "SELECT * FROM policy";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet res = pstmt.executeQuery();
+
+            while (res.next()) {
+                int policyId = res.getInt("policyId");
+                String policyName = res.getString("policyName");
+                String policyType = res.getString("policyType");
+                double coverageAmount = res.getDouble("coverageAmount");
+
+                Policy policy = new Policy(policyId, policyName, policyType, coverageAmount);
+                policyMap.put(policyId, policy);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return policyMap.values(); // Return the Collection of Policy objects
     }
 
     @Override
     public boolean updatePolicy(Policy policy) {
-		Connection conn = DBConnection.getConnection();
+        boolean status = false;
+        try {
 
-		boolean status=false;
-		try {
-			
-			String query = "UPDATE Policy SET policyName=?,policyType=?,coverageAmount=? WHERE policyId = ? ";
-			PreparedStatement pstmt=conn.prepareStatement(query);
-			pstmt.setString(1, policy.getPolicyName());
-			pstmt.setString(2, policy.getPolicyType());
-			pstmt.setDouble(3, policy.getCoverageAmount());
-			pstmt.setInt(4, policy.getPolicyId());
-			
-			status = pstmt.execute();
+            String query = "UPDATE Policy SET policyName=?,policyType=?,coverageAmount=? WHERE policyId = ? ";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, policy.getPolicyName());
+            pstmt.setString(2, policy.getPolicyType());
+            pstmt.setDouble(3, policy.getCoverageAmount());
+            pstmt.setInt(4, policy.getPolicyId());
+
+            status = pstmt.execute();
             // System.out.println(status);
-            if(status)
-            {
+            if (status) {
                 throw new PolicyNotFoundException(0);
             }
-			// return !status;
-		}
-		catch(Exception e) {
-			System.out.println(e.getMessage());
-		}
-	
-		return status;
-	}
+            // return !status;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return status;
+    }
 
     @Override
     public boolean deletePolicy(int policyId) {
-		Connection conn = DBConnection.getConnection();
 
-		boolean status=false;
-		try {
-			
-			String query = "DELETE FROM Policy WHERE policyId = ?";
-			PreparedStatement pstmt=conn.prepareStatement(query);
-			pstmt.setInt(1, policyId);
-			
-			status = pstmt.execute();
+        boolean status = false;
+        try {
+
+            String query = "DELETE FROM Policy WHERE policyId = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, policyId);
+
+            status = pstmt.executeUpdate() > 0;
             // System.out.println(status);
-            if(status==false)
-            {
+            if (status == false) {
                 throw new PolicyNotFoundException(policyId);
             }
-		}
-		catch(Exception e) {
-			System.out.println(e.getMessage());
-		}
-	
-		return status;
-	}
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return status;
+    }
 
 }
